@@ -1,13 +1,16 @@
 import createLogger, { type LoggerOptions } from 'pino';
 import type pinodev from 'pino-dev';
-import type { PrettyOptions } from 'pino-pretty';
+// import type { PrettyOptions } from 'pino-pretty';
 
 type PrettyDevOptions = Parameters<typeof pinodev>[0];
-type BotLoggerOptions = LoggerOptions &
-  (
-    | { transport?: { target: 'pino-dev'; options: PrettyDevOptions } }
-    | { transport?: { target: 'pino-pretty'; options: PrettyOptions } }
-  );
+type BotLoggerOptions = LoggerOptions & {
+  transport?: { target: 'pino-dev'; options: PrettyDevOptions };
+};
+// type BotLoggerOptions = LoggerOptions &
+//   (
+//     | { transport?: { target: 'pino-dev'; options: PrettyDevOptions } }
+//     | { transport?: { target: 'pino-pretty'; options: PrettyOptions } }
+//   );
 
 const developmentOptionsOverride: BotLoggerOptions = {
   transport: {
