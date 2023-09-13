@@ -1,5 +1,6 @@
 import {
   Client,
+  Guild,
   REST,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
   Routes,
@@ -8,19 +9,28 @@ import {
 import { config } from '../config';
 import type { BotCommand } from '../types/bot';
 import { deleteExistingCommands } from './deleteExistingCommands';
+import { coreLogger } from './logger';
 
 const { discord } = config;
 
 export const pushCommands = async (
   commands: RESTPostAPIChatInputApplicationCommandsJSONBody[],
   clientId: string,
-  guildId: string,
+  guild?: Guild,
 ) => {
   const rest = new REST({ version: '10' }).setToken(discord.token);
-  await deleteExistingCommands(rest, clientId, guildId);
-  await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
+  coreLogger.info(`Deleting existing slashcommands on:  ${guild?.name ?? 'all guilds'}.`);
+  await deleteExistingCommands(rest, clientId, guild?.id);
+  coreLogger.info(`Pushing new slashcommands on: ${guild?.name ?? 'all guilds'}.`);
+
+  const putCommandRoute = guild
+    ? Routes.applicationGuildCommands(clientId, guild.id)
+    : Routes.applicationCommands(clientId);
+
+  await rest.put(putCommandRoute, {
     body: commands,
   });
+  coreLogger.info('All commands are pushed.');
 };
 
 export const routeCommands = (client: Client<true>, botCommands: BotCommand[]) =>
@@ -28,7 +38,9 @@ export const routeCommands = (client: Client<true>, botCommands: BotCommand[]) =
     if (!interaction.inGuild() || !interaction.isChatInputCommand()) {
       return;
     }
-
+    coreLogger.debug(
+      `${interaction.commandName} command received by ${interaction.user.tag} - routing...`,
+    );
     const command = botCommands.find((command) => command.schema.name === interaction.commandName);
 
     if (!command) {
@@ -36,10 +48,11 @@ export const routeCommands = (client: Client<true>, botCommands: BotCommand[]) =
         content: `Command not found ${interaction.commandName}`,
         ephemeral: true,
       });
-      return;
+      throw new Error(`Command not found ${interaction.commandName}`);
     }
 
     if (typeof command.handler === 'function') {
+      coreLogger.debug(`${interaction.commandName} command found - running handler.`);
       await command.handler(interaction);
       return;
     }
@@ -53,8 +66,15 @@ export const routeCommands = (client: Client<true>, botCommands: BotCommand[]) =
         } ${interaction.options.getSubcommand()}`,
         ephemeral: true,
       });
-      return;
+      throw new Error(
+        `Subcommand not found ${interaction.commandName} ${interaction.options.getSubcommand()}`,
+      );
     }
 
+    coreLogger.debug(
+      `${
+        interaction.commandName
+      } ${interaction.options.getSubcommand()} subcommand found - running handler.`,
+    );
     await subCommand(interaction);
   });
