@@ -15,8 +15,8 @@ dependencies:
     specifier: 3.0.4
     version: 3.0.4
   cron:
-    specifier: 2.4.4
-    version: 2.4.4
+    specifier: 3.1.0
+    version: 3.1.0
   discord.js:
     specifier: 14.13.0
     version: 14.13.0
@@ -1247,8 +1247,8 @@ packages:
       upper-case: 2.0.2
     dev: false
 
-  /cron@2.4.4:
-    resolution: {integrity: sha512-MHlPImXJj3K7x7lyUHjtKEOl69CSlTOWxS89jiFgNkzXfvhVjhMz/nc7/EIfN9vgooZp8XTtXJ1FREdmbyXOiQ==}
+  /cron@3.1.0:
+    resolution: {integrity: sha512-u6Z89TV7zhG7aW7MX7aLQhK5PYjTzFpzjFgiSX5r7qC1vjPvRt1FVfarHRaN/5IokEXM1DRJcXnwXI0e9G0awA==}
     dependencies:
       '@types/luxon': 3.3.2
       luxon: 3.3.0
